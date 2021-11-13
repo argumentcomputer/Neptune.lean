@@ -11,11 +11,16 @@
       url = github:numtide/flake-utils;
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    utils = {
+      url = github:yatima-inc/nix-utils;
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     neptune.url = github:yatima-inc/neptune/acs/add-flake-setup;
   };
 
-  outputs = { self, lean, flake-utils, nixpkgs, neptune }:
+  outputs = { self, lean, flake-utils, utils, nixpkgs, neptune }:
     let
       supportedSystems = [
         # "aarch64-linux"
@@ -31,9 +36,15 @@
         pkgs = nixpkgs.leagacyPackages.${system};
         name = "Neptune";
         debug = false;
-        # blake3-shim = import ./c/default.nix {
-        #   inherit system pkgs blake3 lean;
-        # };
+        inherit (utils.lib.${system}) buildCLib buildRustProject;
+        neptune-rs = buildRustProject {
+          root = ./bindings;
+        };
+        neptune-shim = buildCLib {
+          name = "neptune-shim";
+          src = ./c-shim;
+          staticLibDeps = [ neptune-rs ];
+        };
         BinaryTools = leanPkgs.buildLeanPackage {
           inherit debug;
           name = "BinaryTools";
@@ -43,7 +54,7 @@
           inherit name debug;
           src = ./src;
           deps = [ BinaryTools ];
-          nativeSharedLibs = [  ];
+          nativeSharedLibs = [ neptune-shim ];
         };
         tests = leanPkgs.buildLeanPackage {
           inherit debug;

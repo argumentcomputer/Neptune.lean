@@ -33,7 +33,7 @@
     flake-utils.lib.eachSystem supportedSystems (system:
       let
         leanPkgs = lean.packages.${system};
-        pkgs = nixpkgs.leagacyPackages.${system};
+        pkgs = nixpkgs.legacyPackages.${system};
         name = "Neptune";
         debug = false;
         inherit (utils.lib.${system}) buildCLib buildRustProject;
@@ -66,6 +66,7 @@
       {
         inherit project tests;
         packages = {
+          inherit neptune-rs neptune-shim BinaryTools;
           inherit (project) modRoot sharedLib staticLib;
           inherit (leanPkgs) lean;
           tests = tests.executable;
@@ -75,7 +76,7 @@
 
         defaultPackage = project.sharedLib;
         devShell = pkgs.mkShell {
-          buildInputs = [ leanPkgs.lean ];
+          buildInputs = [ leanPkgs.lean pkgs.glibc ];
           LEAN_PATH = "${leanPkgs.Lean.modRoot}";
           CPATH = "${leanPkgs.Lean.modRoot}";
         };

@@ -3,7 +3,7 @@ BinaryTools: Utilities for displaying and manipulating Binary data.
 -/
 
 /-
-Simplification rules for ensuring type safety of Blake3Hash
+Simplification rules for proving that a ByteArray is of a particular size.
 -/
 @[simp] theorem ByteArray.size_empty : ByteArray.empty.size = 0 :=
 rfl

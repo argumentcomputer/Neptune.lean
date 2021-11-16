@@ -9,6 +9,6 @@ struct Vec;
 
 extern "C" {
 
-Vec<uint8_t> poseidon(Vec<uint8_t> data);
+uint8_t (poseidon(Vec<uint8_t> data))[32];
 
 } // extern "C"

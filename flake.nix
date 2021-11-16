@@ -37,18 +37,20 @@
         name = "Neptune";
         debug = false;
         inherit (utils.lib.${system}) buildCLib buildRustProject;
-        neptune-rs = buildRustProject {
+        neptune-rs-bindings = (buildRustProject {
           root = ./bindings;
-        };
+        }) // { libPath = "${self}/lib/liblean_neptune_bindings.a"; };
         neptune-shim = buildCLib {
           name = "neptune-shim";
           src = ./c-shim;
-          staticLibDeps = [ neptune-rs ];
+          staticLibDeps = [ neptune-rs-bindings ];
+          updateCCOptions = o: o ++ [ "-I${leanPkgs.lean-bin-tools-unwrapped}/include" "-I${self}/bindings/include" ];
+          extraDrvArgs = { linkName = "lean-socket-native"; };
         };
         BinaryTools = leanPkgs.buildLeanPackage {
           inherit debug;
-          name = "BinaryTools";
           src = ./src;
+          name = "BinaryTools";
         };
         project = leanPkgs.buildLeanPackage {
           inherit name debug;
@@ -66,7 +68,7 @@
       {
         inherit project tests;
         packages = {
-          inherit neptune-rs neptune-shim BinaryTools;
+          inherit neptune-rs-bindings neptune-shim BinaryTools;
           inherit (project) modRoot sharedLib staticLib;
           inherit (leanPkgs) lean;
           tests = tests.executable;

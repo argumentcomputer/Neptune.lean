@@ -47,7 +47,7 @@
           name = "neptune-shim";
           src = ./c-shim;
           staticLibDeps = [ neptune-rs-bindings ];
-          updateCCOptions = o: o ++ [ "-I${leanPkgs.lean-bin-tools-unwrapped}/include" "-I${self}/bindings/include" ];
+          updateCCOptions = o: o ++ [ "-I${leanPkgs.lean-bin-tools-unwrapped}/include" ];#"-I${self}/bindings/include" ];
           extraDrvArgs = { linkName = "lean-socket-native"; };
         };
         BinaryTools = leanPkgs.buildLeanPackage {

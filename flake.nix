@@ -37,9 +37,12 @@
         name = "Neptune";
         debug = false;
         inherit (utils.lib.${system}) buildCLib buildRustProject;
-        neptune-rs-bindings = (buildRustProject {
-          root = ./bindings;
-        }) // { libPath = "${self}/lib/liblean_neptune_bindings.a"; };
+        neptune-rs-bindings = (
+          let lib = buildRustProject {
+            root = ./bindings;
+          };
+          in lib // { libPath = "${lib}/lib/liblean_neptune_bindings.a"; }
+        );
         neptune-shim = buildCLib {
           name = "neptune-shim";
           src = ./c-shim;

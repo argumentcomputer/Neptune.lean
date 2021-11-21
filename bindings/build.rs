@@ -1,13 +1,7 @@
-// extern crate cbindgen;
-
-// use std::env;
 
 fn main() {
-    // let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-
-    // cbindgen::Builder::new()
-    //   .with_crate(crate_dir)
-    //   .generate()
-    //   .expect("Unable to generate bindings")
-    //   .write_to_file("include/neptune.h");
+    cxx_build::bridge("src/lib.rs")
+        .file("./c-shim/neptune-shim.c")
+        .include("include")
+        .compile("lean-neptune-bindings");
 }

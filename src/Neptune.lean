@@ -29,8 +29,8 @@ def Hasher : Type := HasherPointed.type
 
 instance : Inhabited Hasher := ⟨HasherPointed.val⟩
 
-/- @[extern "poseidon"] -/
-/- def poseidon (bs : ByteArray) : ByteArray -/
+@[extern "lean_naptune_poseidon"]
+constant poseidon (u: Unit) : ByteArray
 
 def hash {I: Type u} [Into ByteArray I] (input : I) : NeptuneHash :=
   Inhabited.default

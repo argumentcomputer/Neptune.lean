@@ -6,6 +6,11 @@
       url = github:yatima-inc/lean4/acs/add-nix-ability-for-native-libs;
     };
 
+    naersk = {
+      url = github:nix-community/naersk;
+      inputs.flake-utils.follows = "flake-utils";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = github:nixos/nixpkgs/nixos-21.05;
     flake-utils = {
       url = github:numtide/flake-utils;
@@ -15,12 +20,13 @@
       url = github:yatima-inc/nix-utils;
       inputs.flake-utils.follows = "flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.naersk.follows = "naersk";
     };
 
-    neptune.url = github:yatima-inc/neptune/acs/add-flake-setup;
+    # neptune.url = github:yatima-inc/neptune/acs/add-flake-setup;
   };
 
-  outputs = { self, lean, flake-utils, utils, nixpkgs, neptune }:
+  outputs = { self, lean, flake-utils, utils, nixpkgs, naersk }:
     let
       supportedSystems = [
         # "aarch64-linux"
@@ -36,20 +42,34 @@
         pkgs = nixpkgs.legacyPackages.${system};
         name = "Neptune";
         debug = false;
-        inherit (utils.lib.${system}) buildCLib buildRustProject;
+        lib = utils.lib.${system};
+        inherit (lib) buildCLib buildRustProject makeBareDerivation;
+        bindings-with-include = makeBareDerivation {
+          inherit system pkgs;
+          buildInputs = with pkgs; [ coreutils-full ];
+          name = "bindings-with-include";
+          src = ./bindings;
+          buildCommand = ''
+            mkdir -p $out/include
+            cp -r ${leanPkgs.lean-bin-tools-unwrapped}/include $out
+            cp -r $src/* $out
+          '';
+        };
         neptune-rs-bindings = (
           let lib = buildRustProject {
-            root = ./bindings;
+            src = bindings-with-include;
+            copyTarget = true;
+            buildInputs = with pkgs; [ libclc ];
           };
-          in lib // { libPath = "${lib}/lib/liblean_neptune_bindings.a"; }
+          in lib // { libPath = "${lib}/lib/liblean_neptune_bindings.so"; }
         );
-        neptune-shim = buildCLib {
-          name = "neptune-shim";
-          src = ./c-shim;
-          staticLibDeps = [ neptune-rs-bindings ];
-          updateCCOptions = o: o ++ [ "-I${leanPkgs.lean-bin-tools-unwrapped}/include" ];#"-I${self}/bindings/include" ];
-          extraDrvArgs = { linkName = "lean-socket-native"; };
-        };
+        # neptune-shim = buildCLib {
+        #   name = "neptune-shim";
+        #   src = ./c-shim;
+        #   staticLibDeps = [ neptune-rs-bindings ];
+        #   updateCCOptions = o: o ++ [ "-I${leanPkgs.lean-bin-tools-unwrapped}/include" ];#"-I${self}/bindings/include" ];
+        #   extraDrvArgs = { linkName = "lean-socket-native"; };
+        # };
         BinaryTools = leanPkgs.buildLeanPackage {
           inherit debug;
           src = ./src;
@@ -59,7 +79,7 @@
           inherit name debug;
           src = ./src;
           deps = [ BinaryTools ];
-          nativeSharedLibs = [ neptune-shim ];
+          nativeSharedLibs = [ neptune-rs-bindings ];
         };
         tests = leanPkgs.buildLeanPackage {
           inherit debug;
@@ -71,10 +91,13 @@
       {
         inherit project tests;
         packages = {
-          inherit neptune-rs-bindings neptune-shim BinaryTools;
+          inherit neptune-rs-bindings BinaryTools;
           inherit (project) modRoot sharedLib staticLib;
-          inherit (leanPkgs) lean;
           tests = tests.executable;
+        };
+
+        apps.lean = flake-utils.lib.mkApp {
+          drv = leanPkgs.lean;
         };
 
         checks.tests = tests;

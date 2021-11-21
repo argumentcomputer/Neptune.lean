@@ -33,10 +33,10 @@ mod ffi {
     extern "Rust" {
         // Zero or more opaque types which both languages can pass around but
         // only Rust can see the fields.
-        // type MultiBuf;
+        // type Poseidon<F>;
 
         // Functions implemented in Rust.
-        // fn next_chunk(buf: &mut MultiBuf) -> &[u8];
+        fn poseidon(data: Vec<u8>) -> [u8; 32];
     }
 
     unsafe extern "C++" {
@@ -47,7 +47,7 @@ mod ffi {
 
         // Zero or more opaque types which both languages can pass around but
         // only C++ can see the fields.
-        type BlobstoreClient;
+        // type Poseidon;
 
         // Functions implemented in C++.
         // fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;

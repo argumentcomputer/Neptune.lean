@@ -61,15 +61,12 @@
             copyTarget = true;
             buildInputs = with pkgs; [ libclc ];
           };
-          in lib // { libPath = "${lib}/lib/liblean_neptune_bindings.so"; }
+          in lib // {
+            __toString = d: "${d}/lib";
+            libPath = "${lib}/lib/liblean_neptune_bindings.so";
+            linkName = "liblean_neptune_bindings";
+          }
         );
-        # neptune-shim = buildCLib {
-        #   name = "neptune-shim";
-        #   src = ./c-shim;
-        #   staticLibDeps = [ neptune-rs-bindings ];
-        #   updateCCOptions = o: o ++ [ "-I${leanPkgs.lean-bin-tools-unwrapped}/include" ];#"-I${self}/bindings/include" ];
-        #   extraDrvArgs = { linkName = "lean-socket-native"; };
-        # };
         BinaryTools = leanPkgs.buildLeanPackage {
           inherit debug;
           src = ./src;

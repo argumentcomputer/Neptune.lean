@@ -3,7 +3,7 @@
 
   inputs = {
     lean = {
-      url = github:yatima-inc/lean4/acs/add-nix-ability-for-native-libs;
+      url = github:leanprover/lean4;
     };
 
     naersk = {
@@ -84,6 +84,8 @@
           src = ./tests;
           deps = [ project ];
         };
+        joinDepsDerivationns = getSubDrv:
+          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([ project ] ++ project.allExternalDeps));
       in
       {
         inherit project tests;
@@ -102,8 +104,8 @@
         defaultPackage = project.sharedLib;
         devShell = pkgs.mkShell {
           buildInputs = [ leanPkgs.lean pkgs.glibc ];
-          LEAN_PATH = "${leanPkgs.Lean.modRoot}";
-          CPATH = "${leanPkgs.Lean.modRoot}";
+          LEAN_PATH = joinDepsDerivationns (d: d.modRoot);
+          LEAN_SRC_PATH = joinDepsDerivationns (d: d.src);
         };
       });
 }

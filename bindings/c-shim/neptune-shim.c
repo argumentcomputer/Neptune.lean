@@ -1,7 +1,7 @@
 /* #include "neptune.h" */
 #include "lean/lean.h"
-
-
+#include "lean-neptune-bindings/src/lib.rs.h"
+#include <vector>
 
 
 /**
@@ -58,6 +58,7 @@
 /*  return neptune_hasher_copy(a);*/
 /*}*/
 
+
 lean_obj_res lean_neptune_poseidon() {
 #ifdef DEBUG
   printf("lean_neptune_poseidon");
@@ -65,8 +66,9 @@ lean_obj_res lean_neptune_poseidon() {
   int len = 10;
   lean_object *out = lean_alloc_sarray(1, len, len);
   /* lean_object *a = lean_ensure_exclusive_neptune_hasher(self); */
-  /* neptune_hasher_update(lean_get_external_data(a), lean_sarray_cptr(input), */
-  /*                      input_len); */
+  std::vector<uint8_t> vec;
+  vec = lean_sarray_cptr(out);
+  uint8_t* result = poseidon();
   return out;
 }
 

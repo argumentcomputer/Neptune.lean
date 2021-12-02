@@ -44,22 +44,12 @@
         debug = false;
         lib = utils.lib.${system};
         inherit (lib) buildCLib buildRustProject makeBareDerivation;
-        bindings-with-include = makeBareDerivation {
-          inherit system pkgs;
-          buildInputs = with pkgs; [ coreutils-full ];
-          name = "bindings-with-include";
-          src = ./bindings;
-          buildCommand = ''
-            mkdir -p $out/include
-            cp -r ${leanPkgs.lean-bin-tools-unwrapped}/include $out
-            cp -r $src/* $out
-          '';
-        };
         neptune-rs-bindings = (
           let lib = buildRustProject {
-            src = bindings-with-include;
+            src = ./bindings;
             copyTarget = true;
             buildInputs = with pkgs; [ libclc ];
+            C_INCLUDE_PATH = "${leanPkgs.lean-bin-tools-unwrapped}/include";
           };
           in lib // {
             __toString = d: "${d}/lib";
@@ -84,8 +74,8 @@
           src = ./tests;
           deps = [ project ];
         };
-        joinDepsDerivationns = getSubDrv:
-          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([ project ] ++ project.allExternalDeps));
+        joinDepsDerivations = getSubDrv:
+          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([  ] ++ project.allExternalDeps));
       in
       {
         inherit project tests;
@@ -104,8 +94,10 @@
         defaultPackage = project.sharedLib;
         devShell = pkgs.mkShell {
           buildInputs = [ leanPkgs.lean pkgs.glibc ];
-          LEAN_PATH = joinDepsDerivationns (d: d.modRoot);
-          LEAN_SRC_PATH = joinDepsDerivationns (d: d.src);
+          LEAN_PATH = joinDepsDerivations (d: d.modRoot);
+          LEAN_SRC_PATH = ".:" + joinDepsDerivations (d: d.src);
+          C_INCLUDE_PATH = "${leanPkgs.lean-bin-tools-unwrapped}/include";
+          CPLUS_INCLUDE_PATH = "${leanPkgs.lean-bin-tools-unwrapped}/include";
         };
       });
 }

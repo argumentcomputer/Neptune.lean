@@ -12,20 +12,23 @@ use ff::PrimeField;
 use generic_array::sequence::GenericSequence;
 use generic_array::typenum::{U11, U8};
 use generic_array::GenericArray;
+use cxx::{CxxVector};
 
 #[no_mangle]
-pub extern "C" fn poseidon(data: Vec<u8>) -> [u8; 32] {
+pub extern "C" fn poseidon(data: &CxxVector<u8>) -> Vec<u8> {
+  let data: Vec<u8> = data.iter().map(|&u| u).collect();
   let constants = PoseidonConstants::new_with_strength(Strength::Standard);
   let mut hasher = Poseidon::<Fr, U11>::new(&constants);
   let scalar = Fr::from(123);
   hasher.input(scalar).unwrap();
-  hasher.hash_in_mode(HashMode::Correct).to_bytes_le()
+  hasher.hash_in_mode(HashMode::Correct).to_bytes_le().to_vec()
 }
+
 
 #[cxx::bridge]
 mod ffi {
     // Any shared structs, whose fields will be visible to both languages.
-    struct BlobMetadata {
+    struct Poseidon {
         size: usize,
         tags: Vec<String>,
     }
@@ -36,7 +39,7 @@ mod ffi {
         // type Poseidon<F>;
 
         // Functions implemented in Rust.
-        fn poseidon(data: Vec<u8>) -> [u8; 32];
+        fn poseidon(data: &CxxVector<u8>) -> Vec<u8>;
     }
 
     unsafe extern "C++" {

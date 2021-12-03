@@ -26,7 +26,7 @@ std::vector<uint8_t> lean_byte_array_to_vector(lean_obj_arg bytes) {
 }
 
 
-lean_obj_res lean_neptune_poseidon(lean_obj_arg bytes) {
+lean_obj_res rust_lean_neptune_poseidon(lean_obj_arg bytes) {
 #ifdef DEBUG
   printf("lean_neptune_poseidon");
 #endif

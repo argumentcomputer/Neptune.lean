@@ -46,13 +46,15 @@ mod ffi {
         // One or more headers with the matching C++ declarations. Our code
         // generators don't read it but it gets #include'd and used in static
         // assertions to ensure our picture of the FFI boundary is accurate.
-        // include!("demo/include/blobstore.h");
-
+        include!("lean/lean.h");
+        include!("lean-neptune-bindings/include/neptune-shim.hpp");
         // Zero or more opaque types which both languages can pass around but
         // only C++ can see the fields.
-        // type Poseidon;
+        type lean_object;
 
         // Functions implemented in C++.
+        pub unsafe fn lean_neptune_poseidon(obj: *mut lean_object) -> *mut lean_object;
+
         // fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;
         // fn put(&self, parts: &mut MultiBuf) -> u64;
         // fn tag(&self, blobid: u64, tag: &str);

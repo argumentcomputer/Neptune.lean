@@ -22,8 +22,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.naersk.follows = "naersk";
     };
-
-    # neptune.url = github:yatima-inc/neptune/acs/add-flake-setup;
   };
 
   outputs = { self, lean, flake-utils, utils, nixpkgs, naersk }:
@@ -40,42 +38,40 @@
       let
         leanPkgs = lean.packages.${system};
         pkgs = nixpkgs.legacyPackages.${system};
-        name = "Neptune";
-        debug = false;
         lib = utils.lib.${system};
         inherit (lib) buildCLib buildRustProject makeBareDerivation;
         neptune-rs-bindings = (
           let lib = buildRustProject {
             src = ./bindings;
-            copyTarget = true;
             buildInputs = with pkgs; [ libclc ];
             C_INCLUDE_PATH = "${leanPkgs.lean-bin-tools-unwrapped}/include";
           };
           in lib // {
-            __toString = d: "${d}/lib";
+            __toString = d: "${lib}/lib";
             libPath = "${lib}/lib/liblean_neptune_bindings.so";
-            linkName = "liblean_neptune_bindings";
+            linkName = "lean_neptune_bindings";
           }
         );
         BinaryTools = leanPkgs.buildLeanPackage {
-          inherit debug;
+          debug = false;
           src = ./src;
           name = "BinaryTools";
         };
         project = leanPkgs.buildLeanPackage {
-          inherit name debug;
+          debug = false;
+          name = "Neptune";
           src = ./src;
           deps = [ BinaryTools ];
           nativeSharedLibs = [ neptune-rs-bindings ];
         };
         tests = leanPkgs.buildLeanPackage {
-          inherit debug;
+          debug = false;
           name = "Tests";
           src = ./tests;
           deps = [ project ];
         };
         joinDepsDerivations = getSubDrv:
-          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([  ] ++ project.allExternalDeps));
+          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([ project tests ] ++ project.allExternalDeps));
       in
       {
         inherit project tests;

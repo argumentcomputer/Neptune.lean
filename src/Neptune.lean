@@ -1,27 +1,34 @@
 /-
 Lean bindings to the Neptune hash function
 -/
-import BinaryTools
+import Neptune.BinaryTools
 
 namespace Neptune
 
-constant NEPTUNE_OUT_LEN: Nat := 32
+/-
+BLS12-381 pairing-friendly elliptic curve construction
+-/
+namespace Blstrs
+constant SCALAR_BYTES_LE: Nat := 32
 
 /-
 A dependent ByteArray which guarantees the correct byte length.
 -/
-def NeptuneHash : Type := { r : ByteArray // r.size = NEPTUNE_OUT_LEN }
+def Scalar : Type := { r : ByteArray // r.size = SCALAR_BYTES_LE }
 
 @[defaultInstance]
-instance : Into ByteArray NeptuneHash := ⟨Subtype.val⟩
+instance : Into ByteArray Scalar := ⟨Subtype.val⟩
 
-instance : Into String NeptuneHash := ⟨toBase64⟩
+instance : Into Scalar { r : ByteArray // r.size = SCALAR_BYTES_LE } := ⟨id⟩
 
-instance : ToString NeptuneHash := ⟨into⟩
+instance : Into String Scalar := ⟨toBase64⟩
 
-instance : Inhabited NeptuneHash where
-  default := ⟨(List.replicate NEPTUNE_OUT_LEN 0).toByteArray, by simp⟩
+instance : ToString Scalar := ⟨into⟩
 
+instance : Inhabited Scalar where
+  default := ⟨(List.replicate SCALAR_BYTES_LE 0).toByteArray, by simp⟩
+
+end Blstrs
 
 constant HasherPointed : PointedType
 
@@ -30,8 +37,9 @@ def Hasher : Type := HasherPointed.type
 instance : Inhabited Hasher := ⟨HasherPointed.val⟩
 
 @[extern "lean_neptune_poseidon"]
-constant poseidon (bs : ByteArray) : ByteArray
+private constant lean_neptune_poseidon (bs : @& ByteArray) : ByteArray
 
-def hash {I: Type u} [Into ByteArray I] (input : I) : NeptuneHash :=
-  Inhabited.default
+def poseidon {I: Type u} [Into Blstrs.Scalar I] (input : I) : ByteArray :=
+  let bytes: Blstrs.Scalar := Into.into input
+  lean_neptune_poseidon bytes.val
   

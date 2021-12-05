@@ -52,16 +52,10 @@
             linkName = "lean_neptune_bindings";
           }
         );
-        BinaryTools = leanPkgs.buildLeanPackage {
-          debug = false;
-          src = ./src;
-          name = "BinaryTools";
-        };
         project = leanPkgs.buildLeanPackage {
           debug = false;
           name = "Neptune";
           src = ./src;
-          deps = [ BinaryTools ];
           nativeSharedLibs = [ neptune-rs-bindings ];
         };
         tests = leanPkgs.buildLeanPackage {
@@ -76,7 +70,7 @@
       {
         inherit project tests;
         packages = {
-          inherit neptune-rs-bindings BinaryTools;
+          inherit neptune-rs-bindings;
           inherit (project) modRoot sharedLib staticLib;
           tests = tests.executable;
         };

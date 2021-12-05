@@ -11,10 +11,11 @@ use neptune::{
 };
 
 fn poseidon(data: &CxxVector<u8>) -> Vec<u8> {
-  let data: Vec<u8> = data.iter().map(|&u| u).collect();
+  let mut bytes: [u8; 32] = Default::default();
+  bytes.copy_from_slice(data.iter().map(|&u| u).collect::<Vec<u8>>().as_mut_slice());
+  let scalar = Fr::from_bytes_le(&bytes).unwrap();
   let constants = PoseidonConstants::new_with_strength(Strength::Standard);
   let mut hasher = Poseidon::<Fr, U11>::new(&constants);
-  let scalar = Fr::from(123);
   hasher.input(scalar).unwrap();
   hasher
     .hash_in_mode(HashMode::Correct)

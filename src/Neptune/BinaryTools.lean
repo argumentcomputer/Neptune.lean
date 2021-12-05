@@ -34,12 +34,22 @@ export Into (into)
 
 instance (A: Type u) : Into A A := ⟨id⟩
 
-def String.toByteArray (s : String) : ByteArray :=
-  (List.map
-    (fun c : Char => c.toNat.toUInt8) s.toList).toByteArray
+instance (A: Type u) (h: A → Prop) : Into A (Subtype h) := ⟨Subtype.val⟩
+
+/-
+Transitivity
+-/
+instance (A B C: Type u) [Into B C] [Into A B] : Into A C := ⟨fun c : C =>
+          let b: B := Into.into c;
+          Into.into b⟩
+
+
+/- def String.toByteArray (s : String) : ByteArray := -/
+/-   (List.map -/
+/-     (fun c : Char => c.toNat.toUInt8) s.toList).toByteArray -/
 
 instance : Into ByteArray String := {
-  into := String.toByteArray
+  into := String.toUTF8
 }
 
 namespace Alphabet

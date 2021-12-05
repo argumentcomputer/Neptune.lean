@@ -26,15 +26,13 @@ std::vector<uint8_t> lean_byte_array_to_vector(lean_obj_arg bytes) {
 }
 
 
-lean_obj_res rust_lean_neptune_poseidon(lean_obj_arg bytes) {
+lean_obj_res rust_lean_neptune_poseidon(b_lean_obj_arg bytes) {
 #ifdef DEBUG
   printf("lean_neptune_poseidon");
 #endif
-  uint len = lean_sarray_size(bytes);
-  /* lean_object *out = lean_alloc_sarray(1, len, len); */
-  /* lean_object *a = lean_ensure_exclusive_neptune_hasher(self); */
-  std::vector<uint8_t> vec(len, len);
-  /* vec = lean_sarray_cptr(out); */
+  // Probably the amount of copying can be reduced
+  std::vector<uint8_t> vec;
+  vec = lean_byte_array_to_vector(bytes);
   rust::vec<uint8_t> v = poseidon(vec);
   std::vector<uint8_t> stdv;
   std::copy(v.begin(), v.end(), std::back_inserter(stdv));

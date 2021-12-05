@@ -32,8 +32,6 @@ pub unsafe extern "C" fn lean_neptune_poseidon(obj: *mut lean_object) -> *mut le
 mod ffi {
   // Any shared structs, whose fields will be visible to both languages.
   struct Poseidon {
-    size: usize,
-    tags: Vec<String>,
   }
 
   extern "Rust" {
@@ -57,10 +55,5 @@ mod ffi {
 
     // Functions implemented in C++.
     pub unsafe fn rust_lean_neptune_poseidon(obj: *mut lean_object) -> *mut lean_object;
-
-    // fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;
-    // fn put(&self, parts: &mut MultiBuf) -> u64;
-    // fn tag(&self, blobid: u64, tag: &str);
-    // fn metadata(&self, blobid: u64) -> BlobMetadata;
   }
 }

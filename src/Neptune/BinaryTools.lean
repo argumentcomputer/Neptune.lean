@@ -43,11 +43,6 @@ instance (A B C: Type u) [Into B C] [Into A B] : Into A C := ⟨fun c : C =>
           let b: B := Into.into c;
           Into.into b⟩
 
-
-/- def String.toByteArray (s : String) : ByteArray := -/
-/-   (List.map -/
-/-     (fun c : Char => c.toNat.toUInt8) s.toList).toByteArray -/
-
 instance : Into ByteArray String := {
   into := String.toUTF8
 }

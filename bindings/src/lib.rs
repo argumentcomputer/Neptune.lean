@@ -31,8 +31,6 @@ pub unsafe extern "C" fn lean_neptune_poseidon(obj: *mut lean_object) -> *mut le
 #[cxx::bridge]
 mod ffi {
   // Any shared structs, whose fields will be visible to both languages.
-  struct Poseidon {
-  }
 
   extern "Rust" {
     // Zero or more opaque types which both languages can pass around but

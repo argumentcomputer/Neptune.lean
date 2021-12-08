@@ -17,10 +17,12 @@ jobs:
         install_options: '--tarball-url-prefix https://nixos-nix-install-tests.cachix.org/serve'
         extra_nix_config: |
           experimental-features = nix-command flakes ca-references
+          substituters = https://cache.nixos.org https://lean4.cachix.org https://nix-community.cachix.org https://lean-yatima.cachix.org https://yatima.cachix.org
+          trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= yatima.cachix.org-1:6jbu56QEDZs5hceqvWBxmh3XYQ7qPb3iuSww0yq7jUY= lean4.cachix.org-1:mawtxSxcaiWE24xCXXgh3qnvlTkyU7evRRnGeAhD4Wk= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= lean-yatima.cachix.org-1:8pRoDlOpkpqcRMuf3KAjEM+u8k8F3cuPYBnwPfFuc68=
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
     - uses: cachix/cachix-action@v10
       with:
-        name: yatima
+        name: lean-yatima
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: Nix build default package
       run: nix build $NIX_BUILD_ARGS

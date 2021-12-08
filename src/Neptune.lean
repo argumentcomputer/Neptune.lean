@@ -9,10 +9,13 @@ namespace Neptune
 BLS12-381 pairing-friendly elliptic curve construction
 -/
 namespace Blstrs
+
 constant SCALAR_BYTES_LE: Nat := 32
 
 /-
-A dependent ByteArray which guarantees the correct byte length.
+A field element of BLS12-381 represeted as a dependent
+ByteArray which guarantees the correct byte length.
+This is mostly intended as a proof of cocept.
 -/
 def Scalar : Type := { r : ByteArray // r.size = SCALAR_BYTES_LE }
 
@@ -39,7 +42,13 @@ instance : Inhabited Hasher := ⟨HasherPointed.val⟩
 @[extern "lean_neptune_poseidon"]
 private constant lean_neptune_poseidon (bs : @& ByteArray) : ByteArray
 
-def poseidon {I: Type u} [Into Blstrs.Scalar I] (input : I) : ByteArray :=
+/-
+Hash a single Scalar field element.
+-/
+def poseidon {I: Type u} [Into Blstrs.Scalar I] (input : I) : Blstrs.Scalar :=
   let bytes: Blstrs.Scalar := Into.into input
-  lean_neptune_poseidon bytes.val
-  
+  let out := lean_neptune_poseidon bytes.val
+  if h : out.size = Blstrs.SCALAR_BYTES_LE then
+    ⟨out, h⟩
+  else
+    panic! "Incorrect output size of Scalar" 

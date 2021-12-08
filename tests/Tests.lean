@@ -6,6 +6,6 @@ def main: IO Unit := do
     20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32].toList.toByteArray
   if h : v.size = Neptune.Blstrs.SCALAR_BYTES_LE then
     let l: Neptune.Blstrs.Scalar := ⟨v, h⟩
-    println! "r={Neptune.poseidon l}"
+    println! "Poseidon<Fr,U11>({l})={Neptune.poseidon l}"
   else
-    panic! "Incorrect output size"
+    panic! "Incorrect input size"

@@ -29,7 +29,7 @@
       supportedSystems = [
         # "aarch64-linux"
         # "aarch64-darwin"
-        "i686-linux"
+        # "i686-linux"
         # "x86_64-darwin"
         "x86_64-linux"
       ];
@@ -58,28 +58,24 @@
           src = ./src;
           nativeSharedLibs = [ neptune-rs-bindings ];
         };
-        tests = leanPkgs.buildLeanPackage {
+        test = leanPkgs.buildLeanPackage {
           debug = false;
           name = "Tests";
-          src = ./tests;
+          src = ./test;
           deps = [ project ];
         };
         joinDepsDerivations = getSubDrv:
-          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([ project tests ] ++ project.allExternalDeps));
+          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([ project test ] ++ project.allExternalDeps));
       in
       {
-        inherit project tests;
+        inherit project test;
         packages = {
           inherit neptune-rs-bindings;
           inherit (project) modRoot sharedLib staticLib;
-          tests = tests.executable;
+          test = test.executable;
         };
 
-        apps.lean = flake-utils.lib.mkApp {
-          drv = leanPkgs.lean;
-        };
-
-        checks.tests = tests;
+        checks.test = test.executable;
 
         defaultPackage = project.sharedLib;
         devShell = pkgs.mkShell {

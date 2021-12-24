@@ -1,0 +1,31 @@
+name: "Nix flakes CI"
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      NIX_BUILD_ARGS: -v --print-build-logs --fallback --show-trace
+    steps:
+    - uses: actions/checkout@v2.4.0
+    - uses: cachix/install-nix-action@v16
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          substituters = https://cache.nixos.org https://lean4.cachix.org https://nix-community.cachix.org https://lean-yatima.cachix.org https://yatima.cachix.org
+          trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= yatima.cachix.org-1:6jbu56QEDZs5hceqvWBxmh3XYQ7qPb3iuSww0yq7jUY= lean4.cachix.org-1:mawtxSxcaiWE24xCXXgh3qnvlTkyU7evRRnGeAhD4Wk= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= lean-yatima.cachix.org-1:8pRoDlOpkpqcRMuf3KAjEM+u8k8F3cuPYBnwPfFuc68=
+          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+    - uses: cachix/cachix-action@v10
+      with:
+        name: lean-yatima
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+        extraPullNames: lean4
+    - name: Nix build default package
+      run: nix build $NIX_BUILD_ARGS
+    - name: Nix flake check
+      run: nix flake check $NIX_BUILD_ARGS
+    - name: Nix shell
+      run: nix shell $NIX_BUILD_ARGS --command echo OK

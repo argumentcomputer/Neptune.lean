@@ -3,7 +3,7 @@ BinaryTools: Utilities for displaying and manipulating Binary data.
 -/
 
 /-
-Simplification rules for ensuring type safety of Blake3Hash
+Simplification rules for proving that a ByteArray is of a particular size.
 -/
 @[simp] theorem ByteArray.size_empty : ByteArray.empty.size = 0 :=
 rfl
@@ -34,12 +34,17 @@ export Into (into)
 
 instance (A: Type u) : Into A A := ⟨id⟩
 
-def String.toByteArray (s : String) : ByteArray :=
-  (List.map
-    (fun c : Char => c.toNat.toUInt8) s.toList).toByteArray
+instance (A: Type u) (h: A → Prop) : Into A (Subtype h) := ⟨Subtype.val⟩
+
+/-
+Transitivity
+-/
+instance (A B C: Type u) [Into B C] [Into A B] : Into A C := ⟨fun c : C =>
+          let b: B := Into.into c;
+          Into.into b⟩
 
 instance : Into ByteArray String := {
-  into := String.toByteArray
+  into := String.toUTF8
 }
 
 namespace Alphabet

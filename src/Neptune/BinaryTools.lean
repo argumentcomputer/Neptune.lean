@@ -1,12 +1,12 @@
 /-
 BinaryTools: Utilities for displaying and manipulating Binary data.
 -/
+namespace Neptune
 
 /-
 Simplification rules for proving that a ByteArray is of a particular size.
 -/
-@[simp] theorem ByteArray.size_empty : ByteArray.empty.size = 0 :=
-rfl
+@[simp] theorem ByteArray.size_empty : ByteArray.empty.size = 0 := rfl
 
 @[simp] theorem ByteArray.size_push (B : ByteArray) (a : UInt8) : (B.push a).size = B.size + 1 :=
 by { cases B; simp only [ByteArray.push, ByteArray.size, Array.size_push] }

@@ -7,5 +7,5 @@ This project provides lean bindings to the Neptune hasher and a nix flake to bui
 Run tests with
 
 ```
-nix run .#tests
+nix run .#test
 ```

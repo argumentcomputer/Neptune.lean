@@ -65,23 +65,24 @@
           deps = [ project ];
         };
         joinDepsDerivations = getSubDrv:
-          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") ([ project test ] ++ project.allExternalDeps));
+          pkgs.lib.concatStringsSep ":" (map (d: "${getSubDrv d}") project.allExternalDeps);
       in
       {
         inherit project test;
         packages = {
           inherit neptune-rs-bindings;
-          inherit (project) modRoot sharedLib staticLib;
+          inherit (project) modRoot sharedLib staticLib lean-package;
+          inherit (leanPkgs) lean;
           test = test.executable;
         };
 
         checks.test = test.executable;
 
-        defaultPackage = project.sharedLib;
+        defaultPackage = test.executable;
         devShell = pkgs.mkShell {
-          buildInputs = [ leanPkgs.lean pkgs.glibc ];
-          LEAN_PATH = joinDepsDerivations (d: d.modRoot);
-          LEAN_SRC_PATH = ".:" + joinDepsDerivations (d: d.src);
+          buildInputs = [ leanPkgs.lean-dev ];
+          LEAN_PATH = "./src:./test:" + joinDepsDerivations (d: d.modRoot);
+          LEAN_SRC_PATH = "./src:./test:" + joinDepsDerivations (d: d.src);
           C_INCLUDE_PATH = "${leanPkgs.lean-bin-tools-unwrapped}/include";
           CPLUS_INCLUDE_PATH = "${leanPkgs.lean-bin-tools-unwrapped}/include";
         };

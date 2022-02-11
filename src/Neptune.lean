@@ -33,11 +33,11 @@ instance : Inhabited Scalar where
 
 end Blstrs
 
-constant HasherPointed : PointedType
+constant HasherPointed : NonemptyType
 
 def Hasher : Type := HasherPointed.type
 
-instance : Inhabited Hasher := ⟨HasherPointed.val⟩
+instance : Nonempty Hasher := HasherPointed.property
 
 @[extern "lean_neptune_poseidon"]
 private constant lean_neptune_poseidon (bs : @& ByteArray) : ByteArray
@@ -52,3 +52,5 @@ def poseidon {I: Type u} [Into Blstrs.Scalar I] (input : I) : Blstrs.Scalar :=
     ⟨out, h⟩
   else
     panic! "Incorrect output size of Scalar" 
+
+end Neptune
